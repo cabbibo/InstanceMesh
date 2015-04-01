@@ -43,6 +43,7 @@ function Snake( params ){
 
   var lookupSize = Math.ceil( Math.sqrt( params.instanceNumber ) );
 
+  console.log( lookupSize )
   this.soul = new PhysicsRenderer( 
     lookupSize, 
     params.simulationShader , 
@@ -53,7 +54,7 @@ function Snake( params ){
   this.soul.addBoundTexture( bodyUniforms.t_oPos  , 'oOutput'   );
   this.soul.addBoundTexture( bodyUniforms.t_ooPos , 'ooOutput'  );
 
-  this.soul.resetRand( .2 );
+  this.soul.resetRand( 1.2 );
 
   if( params.soulUniforms ){ this.soul.setUniforms( params.soulUniforms ); }
   
@@ -75,6 +76,11 @@ function Snake( params ){
 
 
   this.body = new THREE.Mesh( geometry , material );
+  this.body.frustumCulled = false;
+
+  this.soul.debugScene.scale.multiplyScalar( .016 );
+  this.soul.debugScene.position.z = -2.5;
+  this.body.add( this.soul.debugScene );
 
 }
 
@@ -172,18 +178,22 @@ Snake.prototype.createGeometry = function( geometry , numOf ){
       normals[ index * 3  + 6 ] = n3.x;
       normals[ index * 3  + 7 ] = n3.y;
       normals[ index * 3  + 8 ] = n3.z;
-     
-      var y = (Math.floor( i / lookupSize )+.5 )/ lookupSize; 
-      var x = (i - ( y * lookupSize ) +.5) / lookupSize;
+    
+      var y = (Math.floor( i / lookupSize ))/ lookupSize;
+      var x = (i - ( (Math.floor( i / lookupSize )) * lookupSize )) / lookupSize;
+    
+       
+      var a = .5 / lookupSize;
+
+      lookups[ index * 2 + 0 ] = x + a;
+      lookups[ index * 2 + 1 ] = y + a;
       
-      lookups[ index * 2 + 0 ] = x;
-      lookups[ index * 2 + 1 ] = y;
-      
-      lookups[ index * 2 + 2 ] = x;
-      lookups[ index * 2 + 3 ] = y;
-      
-      lookups[ index * 2 + 4 ] = x;
-      lookups[ index * 2 + 5 ] = y;
+      lookups[ index * 2 + 2 ] = x + a;
+      lookups[ index * 2 + 3 ] = y + a;
+
+      lookups[ index * 2 + 4 ] = x + a;
+      lookups[ index * 2 + 5 ] = y + a;
+
 
     }
   }

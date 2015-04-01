@@ -26,10 +26,17 @@
       
       var textParticles;
 
+      var leader = new THREE.Object3D();
+      var time = 0;
+
+      var paused = false;
+
       var soulUniforms = {
   
         dT:{ type:"f" , value: 0 },
-        noiseSize: { type:"f" , value: 1 }
+        
+        noiseSize: { type:"f" , value: .3 },
+   
 
 
       }
@@ -43,7 +50,7 @@
         animate();
       }
 
-      shaders.load( 'ss-curl'  , 'curl'  , 'simulation' );
+      shaders.load( 'ss-snake' , 'snake' , 'simulation' );
       
       shaders.load( 'vs-snake' , 'snake' , 'vertex'     );
       shaders.load( 'fs-snake' , 'snake' , 'fragment'   );
@@ -53,7 +60,7 @@
         var w = window.innerWidth;
         var h = window.innerHeight;
 
-        camera = new THREE.PerspectiveCamera( 65 , w/h , .001 , 10 );
+        camera = new THREE.PerspectiveCamera( 65 , w/h , .001 , 100 );
         camera.position.z = 2;
    
         scene = new THREE.Scene();
@@ -66,6 +73,7 @@
         document.body.appendChild( renderer.domElement );
 
         window.addEventListener( 'resize', onWindowResize, false );
+        window.addEventListener( 'dblclick', onDoubleClick, false );
 
 
         controls = new THREE.TrackballControls( camera );
@@ -75,24 +83,29 @@
 
 
 
-        console.log( shaders.vs.snake );
-        console.log( shaders.fs.snake );
         snake = new Snake( {
 
           soulUniforms:       soulUniforms,
           
-          geometry:           new THREE.BoxGeometry( .06 , .02 , .1 ),
-          instanceNumber:     50000,
+          geometry:           new THREE.BoxGeometry( .03 , .001 , .1 ),
+          instanceNumber:     256 * 256,
           renderer:           renderer,
           
           vertexShader:       shaders.vs.snake,
           fragmentShader:     shaders.fs.snake,
           
-          simulationShader:   shaders.ss.curl,
+          simulationShader:   shaders.ss.snake,
           //bodyUniforms:       
 
         });
 
+        var leaderMarker = new THREE.Mesh(
+          new THREE.BoxGeometry( .1 , .1 , .1 ),
+          new THREE.MeshNormalMaterial()
+        );
+
+        leader.add( leaderMarker );
+        scene.add( leader );
 
         scene.add( snake.body );
 
@@ -101,15 +114,30 @@
       
       function animate(){
 
+       
+
         requestAnimationFrame( animate );
         controls.update();
 
+   
+         
         soulUniforms.dT.value = clock.getDelta();
-        snake.update();
+        time += soulUniforms.dT.value;
+
+        if( !paused ){
+          leader.position.x =1.* Math.cos( time + Math.sin( time + 4. ) );
+          leader.position.y =1* Math.sin( time * 2. );
+          snake.update();
+        }
 
         renderer.render( scene , camera );
       }
 
+      function onDoubleClick(){
+
+        paused = !paused;
+
+      }
 
       function onWindowResize() {
 
