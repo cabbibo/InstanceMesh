@@ -1,0 +1,126 @@
+<html>
+
+  <head>
+    <style>
+      body{ margin: 0px; }
+      html{ overflow: hidden }
+    </style>
+  </head>
+
+  <body>
+
+    <script src = "lib/three.min.js"                ></script>
+    <script src = "lib/jquery.min.js"               ></script>
+    <script src = "lib/ShaderLoader.js"             ></script>
+
+    <script src = "lib/TrackballControls.js"        ></script>
+    
+    <script src = "lib/PhysicsRenderer.js"          ></script>
+
+    <script src = "Snake.js"                        ></script>
+    
+    <script>
+
+
+      var camera, renderer, scene , controls , clock;
+      
+      var textParticles;
+
+      var soulUniforms = {
+  
+        dT:{ type:"f" , value: 0 },
+        noiseSize: { type:"f" , value: 1 }
+
+
+      }
+
+      var snake;
+
+      var shaders = new ShaderLoader( 'shaders' );
+
+      shaders.shaderSetLoaded = function(){
+        init();
+        animate();
+      }
+
+      shaders.load( 'ss-curl'  , 'curl'  , 'simulation' );
+      
+      shaders.load( 'vs-snake' , 'snake' , 'vertex'     );
+      shaders.load( 'fs-snake' , 'snake' , 'fragment'   );
+
+      function init(){
+
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+
+        camera = new THREE.PerspectiveCamera( 65 , w/h , .001 , 10 );
+        camera.position.z = 2;
+   
+        scene = new THREE.Scene();
+
+        var dpr = window.devicePixelRatio || 1;
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( dpr );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        document.body.appendChild( renderer.domElement );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+
+
+        controls = new THREE.TrackballControls( camera );
+
+        clock = new THREE.Clock();
+        
+
+
+
+        console.log( shaders.vs.snake );
+        console.log( shaders.fs.snake );
+        snake = new Snake( {
+
+          soulUniforms:       soulUniforms,
+          
+          geometry:           new THREE.BoxGeometry( .01 , .01 , .05 ),
+          instanceNumber:     50000,
+          renderer:           renderer,
+          
+          vertexShader:       shaders.vs.snake,
+          fragmentShader:     shaders.fs.snake,
+          
+          simulationShader:   shaders.ss.curl,
+          //bodyUniforms:       
+
+        });
+
+
+        scene.add( snake.body );
+
+      }
+
+      
+      function animate(){
+
+        requestAnimationFrame( animate );
+        controls.update();
+
+        soulUniforms.dT.value = clock.getDelta();
+        snake.update();
+
+        renderer.render( scene , camera );
+      }
+
+
+      function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+    </script>
+
+  </body>
+</html>
