@@ -18,9 +18,9 @@ void main(){
   vec3 d1 = iPos  - ioPos;
   vec3 d2 = ioPos - iooPos;
 
-  vec3 z = normalize( d1 );
+  vec3 y = normalize( d1 );
   vec3 x = normalize( cross( normalize( d1 ) , normalize( d2 ) ) );
-  vec3 y = cross( z , x );
+  vec3 z = cross( y , x );
   
   mat3 rot = mat3(
     x.x , x.y , x.z ,

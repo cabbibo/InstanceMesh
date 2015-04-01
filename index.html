@@ -87,7 +87,8 @@
 
           soulUniforms:       soulUniforms,
           
-          geometry:           new THREE.BoxGeometry( .03 , .001 , .1 ),
+          //geometry:           new THREE.BoxGeometry( .03 , .001 , .1 ),
+          geometry:           new THREE.CylinderGeometry( 0 , .03  , .1 , 8 , 1 ),
           instanceNumber:     256 * 256,
           renderer:           renderer,
           
