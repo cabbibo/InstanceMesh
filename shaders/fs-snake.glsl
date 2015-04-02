@@ -1,4 +1,4 @@
-uniform vec3 lightPos;
+uniform vec3 leader;
 
 varying vec3 vNorm;
 varying vec3 vMPos;
@@ -10,7 +10,7 @@ void main(){
 
   if( vStag > .5 ) discard;
 
-  vec3 lightDir = normalize( lightPos - vMPos );
+  vec3 lightDir = normalize( leader - vMPos );
   vec3 cameraDir = normalize( cameraPos - vMPos );
 
 

@@ -23,6 +23,9 @@
 function Snake( params ){
 
 
+  // to know if we are added to scene or not.
+  this.active = false;
+
   // Do error checking for params
   this.checkParams( params );
 
@@ -81,14 +84,33 @@ function Snake( params ){
 
   this.soul.debugScene.scale.multiplyScalar( .016 );
   this.soul.debugScene.position.z = -2.5;
-  this.body.add( this.soul.debugScene );
+  ///this.body.add( this.soul.debugScene );
 
 }
 
+Snake.prototype.debug = function(){
+  this.body.add( this.soul.debugScene );
 
+}
 Snake.prototype.update = function(){
 
-  this.soul.update();
+  if( this.active == true ){
+    this.soul.update();
+  }
+
+}
+
+Snake.prototype.activate = function( scene ){
+
+  scene.add( this.body );
+  this.active = true;
+
+}
+
+Snake.prototype.deactivate = function( scene ){
+
+  scene.remove( this.body );
+  this.active = false;
 
 }
 

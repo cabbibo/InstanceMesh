@@ -17,8 +17,12 @@
     
     <script src = "lib/PhysicsRenderer.js"          ></script>
 
+    <!-- organs -->
     <script src = "Snake.js"                        ></script>
-    <script src = "Feather.js"                        ></script>
+    <script src = "RingOSnakes.js"                  ></script>
+    
+    <!-- geometries -->
+    <script src = "Feather.js"                      ></script>
     
     <script>
 
@@ -26,28 +30,25 @@
       var camera, renderer, scene , controls , clock;
       
       var textParticles;
+     
+      var leaders = [];
+      var time = { type: "f" , value :0 };
+var dT = { type:"f" , value: 0 };
 
-      var leader = new THREE.Object3D();
-      var time = 0;
 
       var paused = false;
 
       var soulUniforms = {
   
-        dT:{ type:"f" , value: 0 },
+        dT: dT,
         
-        leader: { type: "v3" , value : leader.position },
-        
-   
       }
 
       var bodyUniforms = {
   
-        lightPos: { type: "v3" , value : leader.position }
-   
       }
 
-      var snake;
+      var ringOSnakes;
 
       var shaders = new ShaderLoader( 'shaders' );
 
@@ -90,15 +91,29 @@
 
         var geo = Feather();
 
+        for( var i = 0; i < 15; i ++ ){
 
-        snake = new Snake( {
+          var leader = new THREE.Object3D();
+          var leaderMarker = new THREE.Mesh(
+            new THREE.IcosahedronGeometry( .1 , 1  ),
+            new THREE.MeshNormalMaterial()
+          );
+
+          leader.add( leaderMarker );
+          scene.add( leader );
+
+          leaders.push( leader );
+
+        }
+
+        ringOSnakes = new RingOSnakes( leaders , {
 
           soulUniforms:       soulUniforms,
           bodyUniforms:       bodyUniforms, 
           
-          //geometry:           new THREE.BoxGeometry( .03 , .001 , .1 ),
-          geometry:           new THREE.CylinderGeometry( 0 , .03  , .3 , 8 , 1 ),
-          instanceNumber:     32 * 32, 
+         // geometry:          geo,
+          geometry:          new THREE.BoxGeometry( .03 , .4 , .1 ),
+          //geometry:           new THREE.CylinderGeometry( 0 , .03  , .3 , 8 , 1 ),
 
           renderer:           renderer,
           
@@ -109,18 +124,8 @@
 
         });
 
-
-
-        var leaderMarker = new THREE.Mesh(
-          new THREE.IcosahedronGeometry( .1 , 1  ),
-          new THREE.MeshNormalMaterial()
-        );
-
-        leader.add( leaderMarker );
-        scene.add( leader );
-
-        scene.add( snake.body );
-
+        ringOSnakes.activate( scene );
+ 
       }
 
       
@@ -133,14 +138,33 @@
 
    
          
-        soulUniforms.dT.value = clock.getDelta();
-        time += soulUniforms.dT.value;
+        dT.value = clock.getDelta();
+        time.value += dT.value;
+
 
         if( !paused ){
-          leader.position.x =2.* Math.cos( time + Math.sin( time + 4. ) );
-          leader.position.y =2* Math.sin( time * 2. );
-          leader.position.z =2* Math.sin( time * 3. );
-          snake.update();
+
+
+          // movement of leaders
+          for( var i = 0; i < leaders.length; i++ ){
+           
+
+            var r = Math.cos( time.value * 4  ) + 3.;
+            var t = (i / leaders.length) * 2 * Math.PI;
+
+            var x = r * Math.sin( t );
+            var z = r * Math.cos( t );
+
+            var y =  2.2 * Math.sin( time.value * 4 ) ;
+
+            leaders[i].position.x = x;
+            leaders[i].position.y = y;
+            leaders[i].position.z = z;
+
+          }
+
+          ringOSnakes.update();
+
         }
 
         renderer.render( scene , camera );

@@ -5,12 +5,16 @@ uniform sampler2D t_pos;
 uniform sampler2D t_oPos;
 uniform sampler2D t_ooPos;
 
+uniform vec3 leader;
+
 varying vec3 vNorm;
 varying vec3 cameraPos;
 varying vec3 vMPos;
 
 // stagnent;
 varying float vStag;
+
+$getConnectionUV
 
 void main(){
 
@@ -21,10 +25,24 @@ void main(){
   vec3 ioPos  = texture2D( t_oPos  , lookup ).xyz;
   vec3 iooPos = texture2D( t_ooPos , lookup ).xyz;
 
-  // getting the difference between pos and oldPos
-  vec3 d1 = iPos  - ioPos;
-  vec3 d2 = ioPos - iooPos;
+  //Getting position of the connection above us
+  vec2 upUV = getConnectionUV( lookup );
 
+  // getting upper position
+  vec3 upPos = vec3( 0. );
+
+  // top object
+  if( upUV.x < 0. ){
+    upPos = leader;
+  }else{
+    upPos = texture2D( t_pos , upUV ).xyz;
+  }
+
+
+  // getting the difference between pos and oldPos
+  vec3 d2 = iPos  - ioPos;
+  //vec3 d2 = ioPos - iooPos;
+  vec3 d1 = upPos - iPos;
 
   mat3 rot = mat3(
     1. , 0. , 0.,
@@ -53,7 +71,7 @@ void main(){
 
   vNorm = rot * normal ;
  
-  vec3 pos = iPos + rot * position;
+  vec3 pos = iPos + (lookup.y + .5) * rot * position;
   cameraPos = cameraPosition;
 
   vMPos = (modelMatrix * vec4( pos , 1. )).xyz;
