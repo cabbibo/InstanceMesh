@@ -153,7 +153,6 @@ Snake.prototype.createGeometry = function( geometry  , numOf ){
   // we've got in the geometry
 
   var totalVerts = faces * 3 * numOf;
-  console.log( 'Snake Verts: ' + totalVerts ); 
 
   var positions = new Float32Array( totalVerts * 3 );
   var lookups   = new Float32Array( totalVerts * 2 );

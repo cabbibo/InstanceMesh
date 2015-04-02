@@ -17,9 +17,13 @@
     
     <script src = "lib/PhysicsRenderer.js"          ></script>
 
+  
     <!-- organs -->
     <script src = "Snake.js"                        ></script>
     <script src = "RingOSnakes.js"                  ></script>
+    
+    <!-- brain -->
+    <script src="SnakeLeaderLogic.js"             ></script>
     
     <!-- geometries -->
     <script src = "Feather.js"                      ></script>
@@ -36,6 +40,7 @@
 var dT = { type:"f" , value: 0 };
 
 
+      var head = new THREE.Object3D();
       var paused = false;
 
       var soulUniforms = {
@@ -91,6 +96,17 @@ var dT = { type:"f" , value: 0 };
 
         var geo = Feather();
 
+
+        var headMarker = new THREE.Mesh(
+          new THREE.IcosahedronGeometry( .3 , 1  ),
+          new THREE.MeshNormalMaterial()
+        );
+
+
+        head.add( headMarker );
+        head.velocity = new THREE.Vector3();
+          scene.add( head);
+
         for( var i = 0; i < 10; i ++ ){
 
           var leader = new THREE.Object3D();
@@ -104,6 +120,14 @@ var dT = { type:"f" , value: 0 };
           scene.add( leader );
 
           leaders.push( leader );
+
+          var t = Math.PI * 2 * ( i / 10 );
+          var r = 2;
+         
+          leader.position.x = i;//r * Math.cos( t );
+          //leader.position.y = r * Math.sin( t );
+          
+
 
         }
 
@@ -126,6 +150,10 @@ var dT = { type:"f" , value: 0 };
         });
 
         ringOSnakes.activate( scene );
+
+       snakeLeaderLogic = new SnakeLeaderLogic( head , leaders ) ;
+
+        
  
       }
 
@@ -145,25 +173,30 @@ var dT = { type:"f" , value: 0 };
 
         if( !paused ){
 
+          head.position.x = 3 *  Math.cos( time.value );
+          head.position.y = 5 * Math.sin( time.value );
+          head.position.z = 5 * Math.sin( time.value * 3.4 );
+          snakeLeaderLogic.update();
+          
 
           // movement of leaders
-          for( var i = 0; i < leaders.length; i++ ){
+          /*for( var i = 0; i < leaders.length; i++ ){
            
 
-            var r = Math.cos( time.value * 4  ) + 3.;
+            var r = 2 * Math.cos( time.value * 1.5 + Math.sin( time.value * 2. )  ) + 6.;
             var t = (i / leaders.length) * 2 * Math.PI;
 
-            var x = r * Math.sin( t + time.value * 1);
-            var y = r * Math.cos( t + time.value * 1);
+            var x = r * Math.sin( t + time.value * 1  + .2 * Math.cos( time.value * 1.9));
+            var y = r * Math.cos( t + i +  time.value * 1+ .4 * Math.cos( time.value * .9));
 
             var z = 0;
-            //var z =  2.2 * Math.sin( time.value * 4 ) ;
+            var z = r * Math.sin( time.value * .2 + i ) ;
 
             leaders[i].position.x = x;
             leaders[i].position.y = y;
             leaders[i].position.z = z;
 
-          }
+          }*/
 
           ringOSnakes.update();
 
