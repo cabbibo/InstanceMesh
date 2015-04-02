@@ -14,8 +14,6 @@ varying float vStag;
 
 void main(){
 
-
-  
   // instance position
   vec3 iPos   = texture2D( t_pos   , lookup ).xyz;
   vec3 ioPos  = texture2D( t_oPos  , lookup ).xyz;

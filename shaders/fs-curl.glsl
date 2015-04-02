@@ -29,8 +29,6 @@ void main(){
   col += ambi * vec3( .2 , 0., 1. );
   
 
-  vec3 nCol = vec3( vNorm * .5 + .5 );
-  gl_FragColor = vec4( col * nCol  + .3 * nCol, 1. ); 
-
+  gl_FragColor = vec4( col  + vec3( vNorm * .5 + .5 ), 1. ); 
 
 }

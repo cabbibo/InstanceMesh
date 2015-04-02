@@ -1,55 +1,6 @@
+vec2 connectionUV( in vec2 uv , out vec2 uvOut1 , ou){
 
-uniform sampler2D t_oPos;
-uniform sampler2D t_pos;
-
-uniform float dT;
-
-uniform vec3 leader;
-
-uniform vec2  resolution;
-
-const float size = 1. / 32.;
-const float hSize = size / 2.;
-
-const float maxVel = 100.;
-
-vec3 springForce( vec3 toPos , vec3 fromPos , float staticLength ){
-
-  vec3 dif = fromPos - toPos;
-  vec3 nDif = normalize( dif );
-  vec3 balance = nDif * staticLength;
-
-  vec3 springDif = balance - dif;
-
-  return springDif;
-
-}
-
-void main(){
-
-  vec2 uv = gl_FragCoord.xy / resolution;
-
-
-  vec4 oPos = texture2D( t_oPos , uv );
-  vec4 pos  = texture2D( t_pos , uv );
-
-  float life = pos.w;
-  life -= .1;
-
-  // Get our velocity
-  vec3 vel = oPos.xyz - pos.xyz;
-
-  vec3  force = vec3(0.);
-  
-
-
-  float aF = 1.;
-
-  // Waveyness
-  // ( as object moves through simplex noise field, will look different )
-  // TODO
- // float w = 1. + snoise( pos * .01 );
-
+  float size = 1. / 32.;
   float mIx = floor( (uv.x) / size );
   float mIy = floor( (uv.y) / size );
 
@@ -57,6 +8,29 @@ void main(){
   vec2 mI = vec2( mIx , mIy );
 
   // If we are in the first column ( spine )
+  if( mI.x < 1.){
+
+
+    // If we are the upper most spine
+    // We are connected to the leader
+    if( mI.y < 1.){
+    
+      // return a negative number to know that its no a uv
+      return vec2( -1. , -1. );
+
+    }else{
+
+      // Every other vertabrae in the spine
+      // Gets attracted to the one above it
+      return vec2( uv.x , uv.y - size );
+   
+   
+    }
+
+
+}
+
+ // If we are in the first column ( spine )
   if( mI.x < 1.){
 
 
@@ -188,36 +162,3 @@ void main(){
 
     }
 
-  }
-
-  /*vec3 dampeningForce = vel * -.1;
-  
-  force += dampeningForce;*/
- 
-
-  vel += force * dT;
-
-  if( length( vel ) > maxVel ){
-
-    vel = normalize( vel ) * maxVel;
-
-  }
-
-  vel *= .7;
-
-  vec3 p = pos.xyz + vel * dT ; 
-
-  if( dT < .5 ){
-  
-    gl_FragColor = vec4( p , life );
-
-  }else{
-
-   gl_FragColor = vec4( pos.xyz , life );
-
-  }
-
-
-//gl_FragColor = vec4( pos.xyz , life );
-
-}

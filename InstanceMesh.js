@@ -41,8 +41,9 @@ function Snake( params ){
 
   }
 
-  var lookupSize = 32;//Math.ceil( Math.sqrt( params.instanceNumber ) );
+  var lookupSize = Math.ceil( Math.sqrt( params.instanceNumber ) );
 
+  console.log( lookupSize )
   this.soul = new PhysicsRenderer( 
     lookupSize, 
     params.simulationShader , 
@@ -114,6 +115,7 @@ Snake.prototype.addUniforms = function( uniforms , uniformsToAdd ){
 Snake.prototype.checkParams = function( params ){
 
   if( !params.geometry          ){ console.log( 'no geometry provided'        ); } 
+  if( !params.instanceNumber    ){ console.log( 'no instanceNumber provided'  ); } 
   if( !params.renderer          ){ console.log( 'no renderer provided'        ); } 
   if( !params.vertexShader      ){ console.log( 'no vert shader provided'     ); } 
   if( !params.fragmentShader    ){ console.log( 'no frag shader provided'     ); } 
@@ -123,7 +125,7 @@ Snake.prototype.checkParams = function( params ){
 
 }
 
-Snake.prototype.createGeometry = function( geometry  , numOf ){
+Snake.prototype.createGeometry = function( geometry , numOf ){
 
   var faces = geometry.faces.length;
 

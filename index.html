@@ -18,6 +18,7 @@
     <script src = "lib/PhysicsRenderer.js"          ></script>
 
     <script src = "Snake.js"                        ></script>
+    <script src = "Feather.js"                        ></script>
     
     <script>
 
@@ -35,10 +36,15 @@
   
         dT:{ type:"f" , value: 0 },
         
-        noiseSize: { type:"f" , value: .3 },
+        leader: { type: "v3" , value : leader.position },
+        
    
+      }
 
-
+      var bodyUniforms = {
+  
+        lightPos: { type: "v3" , value : leader.position }
+   
       }
 
       var snake;
@@ -82,31 +88,36 @@
         
 
 
+        var geo = Feather();
+
 
         snake = new Snake( {
 
           soulUniforms:       soulUniforms,
+          bodyUniforms:       bodyUniforms, 
           
           //geometry:           new THREE.BoxGeometry( .03 , .001 , .1 ),
-          geometry:           new THREE.CylinderGeometry( 0 , .03  , .1 , 8 , 1 ),
-          instanceNumber:     256 * 256,
+          geometry:           new THREE.CylinderGeometry( 0 , .03  , .3 , 8 , 1 ),
+          instanceNumber:     32 * 32, 
+
           renderer:           renderer,
           
           vertexShader:       shaders.vs.snake,
           fragmentShader:     shaders.fs.snake,
           
           simulationShader:   shaders.ss.snake,
-          //bodyUniforms:       
 
         });
 
+
+
         var leaderMarker = new THREE.Mesh(
-          new THREE.BoxGeometry( .1 , .1 , .1 ),
+          new THREE.IcosahedronGeometry( .1 , 1  ),
           new THREE.MeshNormalMaterial()
         );
 
         leader.add( leaderMarker );
-        //scene.add( leader );
+        scene.add( leader );
 
         scene.add( snake.body );
 
@@ -126,8 +137,9 @@
         time += soulUniforms.dT.value;
 
         if( !paused ){
-          leader.position.x =1.* Math.cos( time + Math.sin( time + 4. ) );
-          leader.position.y =1* Math.sin( time * 2. );
+          leader.position.x =2.* Math.cos( time + Math.sin( time + 4. ) );
+          leader.position.y =2* Math.sin( time * 2. );
+          leader.position.z =2* Math.sin( time * 3. );
           snake.update();
         }
 
