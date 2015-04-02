@@ -68,7 +68,7 @@ var dT = { type:"f" , value: 0 };
         var h = window.innerHeight;
 
         camera = new THREE.PerspectiveCamera( 65 , w/h , .001 , 100 );
-        camera.position.z = 2;
+        camera.position.z = 3;
    
         scene = new THREE.Scene();
 
@@ -91,7 +91,7 @@ var dT = { type:"f" , value: 0 };
 
         var geo = Feather();
 
-        for( var i = 0; i < 15; i ++ ){
+        for( var i = 0; i < 10; i ++ ){
 
           var leader = new THREE.Object3D();
           var leaderMarker = new THREE.Mesh(
@@ -100,6 +100,7 @@ var dT = { type:"f" , value: 0 };
           );
 
           leader.add( leaderMarker );
+          leader.velocity = new THREE.Vector3();
           scene.add( leader );
 
           leaders.push( leader );
@@ -152,10 +153,11 @@ var dT = { type:"f" , value: 0 };
             var r = Math.cos( time.value * 4  ) + 3.;
             var t = (i / leaders.length) * 2 * Math.PI;
 
-            var x = r * Math.sin( t );
-            var z = r * Math.cos( t );
+            var x = r * Math.sin( t + time.value * 1);
+            var y = r * Math.cos( t + time.value * 1);
 
-            var y =  2.2 * Math.sin( time.value * 4 ) ;
+            var z = 0;
+            //var z =  2.2 * Math.sin( time.value * 4 ) ;
 
             leaders[i].position.x = x;
             leaders[i].position.y = y;

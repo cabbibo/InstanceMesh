@@ -56,7 +56,7 @@ function Snake( params ){
   this.soul.addBoundTexture( bodyUniforms.t_oPos  , 'oOutput'   );
   this.soul.addBoundTexture( bodyUniforms.t_ooPos , 'ooOutput'  );
 
-  this.soul.resetRand( 1.2 );
+  this.soul.resetRand( .2 );
 
   if( params.soulUniforms ){ this.soul.setUniforms( params.soulUniforms ); }
   
