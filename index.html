@@ -135,7 +135,7 @@ var dT = { type:"f" , value: 0 };
         head.velocity = new THREE.Vector3();
           scene.add( head);
 
-        for( var i = 0; i < 10; i ++ ){
+        for( var i = 0; i < 1; i ++ ){
 
           var leader = new THREE.Object3D();
           var leaderMarker = new THREE.Mesh(
@@ -159,12 +159,13 @@ var dT = { type:"f" , value: 0 };
 
         }
 
+        var geo = new THREE.BoxGeometry( .1 , .1 , .1 );
         ringOSnakes = new RingOSnakes( leaders , {
 
           soulUniforms:       soulUniforms,
           bodyUniforms:       bodyUniforms, 
           
-          geometry:          geo,
+          geometry:            geo,
 
           renderer:           renderer,
           

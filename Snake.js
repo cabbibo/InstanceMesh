@@ -74,7 +74,7 @@ function Snake( params ){
     vertexShader:   params.vertexShader,
     fragmentShader: params.fragmentShader,
 
-    side: THREE.DoubleSide 
+   // side: THREE.DoubleSide 
 
   });
 
@@ -157,47 +157,51 @@ Snake.prototype.createGeometry = function( geometry  , numOf ){
   var lookups   = new Float32Array( numOf * 2 );
 
 
-  var lookupSize = Math.ceil( Math.sqrt( numOf ) );
 
   for( var j = 0; j < faces; j++ ){
 
-      var index =  j * 3;
+    var index =  j * 3;
 
-      var face = geometry.faces[j];
+    var face = geometry.faces[j];
 
-      var p1 = geometry.vertices[ face.a ];
-      var p2 = geometry.vertices[ face.b ];
-      var p3 = geometry.vertices[ face.c ];
+    var p1 = geometry.vertices[ face.a ];
+    var p2 = geometry.vertices[ face.b ];
+    var p3 = geometry.vertices[ face.c ];
 
-      var n1 = face.vertexNormals[ 0 ]; 
-      var n2 = face.vertexNormals[ 1 ]; 
-      var n3 = face.vertexNormals[ 2 ]; 
-     
-      positions[ index * 3  + 0 ] = p1.x;
-      positions[ index * 3  + 1 ] = p1.y;
-      positions[ index * 3  + 2 ] = p1.z;
+    var n1 = face.vertexNormals[ 0 ]; 
+    var n2 = face.vertexNormals[ 1 ]; 
+    var n3 = face.vertexNormals[ 2 ]; 
+ 
+    console.log( j ); 
+    console.log( p1.y ); 
+    positions[ index * 3  + 0 ] = p1.x;
+    positions[ index * 3  + 1 ] = p1.y;
+    positions[ index * 3  + 2 ] = p1.z;
 
-      positions[ index * 3  + 3 ] = p2.x;
-      positions[ index * 3  + 4 ] = p2.y;
-      positions[ index * 3  + 5 ] = p2.z;
+    positions[ index * 3  + 3 ] = p2.x;
+    positions[ index * 3  + 4 ] = p2.y;
+    positions[ index * 3  + 5 ] = p2.z;
 
-      positions[ index * 3  + 6 ] = p3.x;
-      positions[ index * 3  + 7 ] = p3.y;
-      positions[ index * 3  + 8 ] = p3.z;
+    positions[ index * 3  + 6 ] = p3.x;
+    positions[ index * 3  + 7 ] = p3.y;
+    positions[ index * 3  + 8 ] = p3.z;
 
-      normals[ index * 3  + 0 ] = n1.x;
-      normals[ index * 3  + 1 ] = n1.y;
-      normals[ index * 3  + 2 ] = n1.z;
+    normals[ index * 3  + 0 ] = n1.x;
+    normals[ index * 3  + 1 ] = n1.y;
+    normals[ index * 3  + 2 ] = n1.z;
 
-      normals[ index * 3  + 3 ] = n2.x;
-      normals[ index * 3  + 4 ] = n2.y;
-      normals[ index * 3  + 5 ] = n2.z;
+    normals[ index * 3  + 3 ] = n2.x;
+    normals[ index * 3  + 4 ] = n2.y;
+    normals[ index * 3  + 5 ] = n2.z;
 
-      normals[ index * 3  + 6 ] = n3.x;
-      normals[ index * 3  + 7 ] = n3.y;
-      normals[ index * 3  + 8 ] = n3.z;
-   
-    } 
+    normals[ index * 3  + 6 ] = n3.x;
+    normals[ index * 3  + 7 ] = n3.y;
+    normals[ index * 3  + 8 ] = n3.z;
+ 
+  } 
+
+  
+  var lookupSize = Math.ceil( Math.sqrt( numOf ) );
         
   for( var i = 0; i < numOf; i++ ){
       var y = (Math.floor( i / lookupSize ))/ lookupSize;
