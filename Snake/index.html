@@ -14,23 +14,24 @@
 
   <body>
 
-    <script src = "lib/three.min.js"                ></script>
-    <script src = "lib/jquery.min.js"               ></script>
-    <script src = "lib/stats.min.js"                ></script>
-    <script src = "lib/ShaderLoader.js"             ></script>
+    <script src = "../lib/three.min.js"                ></script>
+    <script src = "../lib/jquery.min.js"               ></script>
+    <script src = "../lib/stats.min.js"                ></script>
+    <script src = "../lib/ShaderLoader.js"             ></script>
 
-    <script src = "lib/TrackballControls.js"        ></script>
+    <script src = "../lib/TrackballControls.js"        ></script>
     
-    <script src = "lib/PhysicsRenderer.js"          ></script>
-    <script src = "lib/ObjectControls.js"           ></script>
+    <script src = "../lib/PhysicsRenderer.js"          ></script>
+    <script src = "../lib/ObjectControls.js"           ></script>
 
-    <script src = "InstanceMesh.js"                 ></script> 
+    <script src = "../InstanceMesh.js"                 ></script> 
+    
     <!-- organs -->
-    <script src = "Snake/Snake.js"                  ></script>
-    <script src = "Snake/RingOSnakes.js"            ></script>
+    <script src = "Snake.js"                  ></script>
+    <script src = "RingOSnakes.js"            ></script>
     
     <!-- brain -->
-    <script src="Snake/SnakeLeaderLogic.js"         ></script>
+    <script src = "SnakeLeaderLogic.js"         ></script>
     
     <script>
 
@@ -129,7 +130,7 @@ var dT = { type:"f" , value: 0 };
         head.velocity = new THREE.Vector3();
           scene.add( head);
 
-        for( var i = 0; i < 1; i ++ ){
+        for( var i = 0; i < 4; i ++ ){
 
           var leader = new THREE.Object3D();
           var leaderMarker = new THREE.Mesh(
