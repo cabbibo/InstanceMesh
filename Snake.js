@@ -152,19 +152,16 @@ Snake.prototype.createGeometry = function( geometry  , numOf ){
   // Get the totalVerts by looking up how many faces
   // we've got in the geometry
 
-  var totalVerts = faces * 3 * numOf;
-
-  var positions = new Float32Array( totalVerts * 3 );
-  var lookups   = new Float32Array( totalVerts * 2 );
-  var normals   = new Float32Array( totalVerts * 3 );
+  var positions = new Float32Array( faces * 3 );
+  var normals   = new Float32Array( faces * 3 );
+  var lookups   = new Float32Array( numOf * 2 );
 
 
   var lookupSize = Math.ceil( Math.sqrt( numOf ) );
 
-  for( var i = 0; i < numOf; i++ ){
-    for( var j = 0; j < faces; j++ ){
+  for( var j = 0; j < faces; j++ ){
 
-      var index = ((i * faces) + j) * 3;
+      var index =  j * 3;
 
       var face = geometry.faces[j];
 
@@ -199,32 +196,27 @@ Snake.prototype.createGeometry = function( geometry  , numOf ){
       normals[ index * 3  + 6 ] = n3.x;
       normals[ index * 3  + 7 ] = n3.y;
       normals[ index * 3  + 8 ] = n3.z;
-    
+   
+    } 
+        
+  for( var i = 0; i < numOf; i++ ){
       var y = (Math.floor( i / lookupSize ))/ lookupSize;
       var x = (i - ( (Math.floor( i / lookupSize )) * lookupSize )) / lookupSize;
     
        
       var a = .5 / lookupSize;
 
-      lookups[ index * 2 + 0 ] = x + a;
-      lookups[ index * 2 + 1 ] = y + a;
+      lookups[ i * 2 + 0 ] = x + a;
+      lookups[ i * 2 + 1 ] = y + a;
       
-      lookups[ index * 2 + 2 ] = x + a;
-      lookups[ index * 2 + 3 ] = y + a;
-
-      lookups[ index * 2 + 4 ] = x + a;
-      lookups[ index * 2 + 5 ] = y + a;
-
-
-    }
   }
 
 
-  var geo = new THREE.BufferGeometry();
+  var geo = new THREE.InstancedBufferGeometry();
 
   var a_position  = new THREE.BufferAttribute( positions , 3 );
   var a_normal    = new THREE.BufferAttribute( normals   , 3 );
-  var a_lookup    = new THREE.BufferAttribute( lookups   , 2 );
+  var a_lookup    = new THREE.InstancedBufferAttribute( lookups, 2, 1, false );
 
   geo.addAttribute( 'position'  , a_position );
   geo.addAttribute( 'normal'    , a_normal   );
