@@ -74,7 +74,7 @@ function Snake( params ){
     vertexShader:   params.vertexShader,
     fragmentShader: params.fragmentShader,
 
-    side: THREE.BackSide
+    side: THREE.DoubleSide 
 
   });
 

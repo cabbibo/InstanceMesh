@@ -6,7 +6,7 @@ function SnakeLeaderLogic( head , leaders ){
   this.v1 = new THREE.Vector3();
   this.v2 = new THREE.Vector3();
 
-  this.dampening = .93;
+  this.dampening = .9;
 
   this.forces = [];
 
@@ -60,6 +60,7 @@ SnakeLeaderLogic.prototype.calculateForces = function( id , head ,  leader ){
     this.v1.multiplyScalar( .03 );
 
     this.forces[ id  ].copy( this.v1 );
+  
   }else{
 
     this.v1.copy( this.leaders[id-1].position );
