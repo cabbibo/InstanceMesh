@@ -1,0 +1,322 @@
+<html>
+
+  <head>
+    <style>
+      body{ margin: 0px; }
+      html{ overflow: hidden }
+      #stats{ 
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <script src = "../lib/three.min.js"                ></script>
+    <script src = "../lib/jquery.min.js"               ></script>
+    <script src = "../lib/stats.min.js"                ></script>
+    <script src = "../lib/ShaderLoader.js"             ></script>
+
+    <script src = "../lib/TrackballControls.js"        ></script>
+    
+    <script src = "../lib/PhysicsRenderer.js"          ></script>
+    <script src = "../lib/ObjectControls.js"           ></script>
+    <script src = "../lib/OBJLoader.js"                ></script>
+    <script src = "../InstanceMesh.js"                 ></script> 
+    
+    <!-- organs -->
+    <script src = "Snake.js"                  ></script>
+    <script src = "RingOSnakes.js"            ></script>
+    
+    <!-- brain -->
+    <script src = "SnakeLeaderLogic.js"         ></script>
+    
+    <script>
+
+
+      var camera, renderer, scene , controls , clock;
+     
+      var stats; 
+      var textParticles;
+    
+      var objectControls , intersectionPlane;
+
+      var leaders = [];
+      var time = { type: "f" , value :0 };
+var dT = { type:"f" , value: 0 };
+
+
+      var head = new THREE.Object3D();
+      var paused = false;
+
+      var soulUniforms = {
+  
+        dT: dT,
+        
+      }
+
+      var bodyUniforms = {
+  
+      }
+
+      var loaded = 0;
+      var neededToLoad = 3;
+      var loader = new THREE.OBJLoader();
+
+      loader.load( '../models/Jelly_617.obj', function ( object ) {
+
+        object.traverse( function ( child ) {
+
+          if ( child instanceof THREE.Mesh ) {
+
+            console.log( child.geometry );
+            spineGeometry = child.geometry;
+
+          }
+
+        });
+
+        onLoad();
+
+      });
+
+
+      loader.load( '../models/Curved_Limb_818.obj', function ( object ) {
+
+        object.traverse( function ( child ) {
+
+          if ( child instanceof THREE.Mesh ) {
+
+            console.log( child.geometry );
+            //subGeometry = child.geometry;
+
+            for( var i =0; i< child.geometry.attributes.position.array.length; i++ ){
+             child.geometry.attributes.position.array[ i ] *= 5;
+            }
+
+            subGeometry = child.geometry;
+
+          }
+
+        });
+
+        onLoad();
+
+      });
+      
+      var ringOSnakes;
+
+      var shaders = new ShaderLoader( 'shaders' );
+
+      shaders.shaderSetLoaded = function(){
+        onLoad(); 
+      }
+
+      shaders.load( 'ss-snake' , 'snake' , 'simulation' );
+      
+      shaders.load( 'vs-snake' , 'snake' , 'vertex'     );
+      shaders.load( 'fs-snake' , 'snake' , 'fragment'   );
+
+      function init(){
+
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+
+        camera = new THREE.PerspectiveCamera( 65 , w/h , .001 , 100 );
+        camera.position.z = 3;
+   
+        scene = new THREE.Scene();
+
+        var dpr = window.devicePixelRatio || 1;
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( dpr );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        document.body.appendChild( renderer.domElement );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+        window.addEventListener( 'dblclick', onDoubleClick, false );
+
+
+        controls = new THREE.TrackballControls( camera );
+
+        clock = new THREE.Clock();
+      
+        stats = new Stats();
+        stats.domElement.id = 'stats';
+        document.body.appendChild( stats.domElement ); 
+
+        /*
+
+           Object Control stuff!!!!
+
+        */ 
+
+        objectControls = new ObjectControls( camera );
+
+
+        var geo = new THREE.PlaneGeometry( 100000 , 100000 );
+        var mat = new THREE.MeshNormalMaterial({side: THREE.DoubleSide});
+        intersectionPlane = new THREE.Mesh( geo , mat );
+        intersectionPlane.visible = false;
+        scene.add( intersectionPlane );
+
+
+        var headMarker = new THREE.Mesh(
+          new THREE.IcosahedronGeometry( .3 , 1  ),
+          new THREE.MeshNormalMaterial()
+        );
+
+
+        head.add( headMarker );
+        head.velocity = new THREE.Vector3();
+          scene.add( head);
+
+        for( var i = 0; i < 1; i ++ ){
+
+          var leader = new THREE.Object3D();
+          var leaderMarker = new THREE.Mesh(
+            new THREE.IcosahedronGeometry( .1 , 1  ),
+            new THREE.MeshNormalMaterial()
+          );
+
+          leader.add( leaderMarker );
+          leader.velocity = new THREE.Vector3();
+          scene.add( leader );
+
+          leaders.push( leader );
+
+          var t = Math.PI * 2 * ( i / 10 );
+          var r = 2;
+         
+          leader.position.x = i;//r * Math.cos( t );
+          //leader.position.y = r * Math.sin( t );
+          
+
+
+        }
+
+        var geo = new THREE.BoxGeometry( .1 , .1 , .1 );
+        ringOSnakes = new RingOSnakes( leaders , {
+
+          soulUniforms:       soulUniforms,
+          uniforms:{
+            spine:  bodyUniforms,
+            sub:    bodyUniforms,
+            subSub: bodyUniforms,
+            bundle: bodyUniforms
+          },
+          geos:{
+            spine:  spineGeometry,//new THREE.CylinderGeometry( 0 , .5 , 3., 5 , 1 ),
+            sub:    spineGeometry,//new THREE.IcosahedronGeometry( .1 , 0  ),
+            subSub: spineGeometry,//new THREE.PlaneGeometry( .6 , 1.9 ),
+            bundle: subGeometry//new THREE.CylinderGeometry( .1 , 0 , .5 , 5 , 1 ),
+          },
+          vs:{
+            spine:  shaders.vs.snake,
+            sub:    shaders.vs.snake,
+            subSub: shaders.vs.snake,
+            bundle: shaders.vs.snake
+          },
+          fs:{
+            spine:  shaders.fs.snake,
+            sub:    shaders.fs.snake,
+            subSub: shaders.fs.snake,
+            bundle: shaders.fs.snake
+          },
+
+          renderer:           renderer,
+          
+          simulationShader:   shaders.ss.snake,
+
+        });
+
+        ringOSnakes.activate( scene );
+
+       snakeLeaderLogic = new SnakeLeaderLogic( head , leaders ) ;
+
+        
+ 
+      }
+
+      
+      function animate(){
+
+       
+
+        
+        requestAnimationFrame( animate );
+        stats.update();
+        controls.update();
+
+   
+         
+        dT.value = clock.getDelta();
+        time.value += dT.value;
+
+        intersectionPlane.lookAt( camera.position );
+
+        var raycaster = objectControls.raycaster;
+        var i = raycaster.intersectObject( intersectionPlane );
+
+        if( !i[0] ){
+          console.log( 'somethings wrong' );
+        }else{
+
+          head.position.copy( i[0].point );
+
+        }
+
+        objectControls.update();
+
+        if( !paused ){
+
+        /*  head.position.x = 3 *  Math.cos( time.value );
+          head.position.y = 5 * Math.sin( time.value );
+          head.position.z = 5 * Math.sin( time.value * 3.4 );
+          */
+          snakeLeaderLogic.update();
+          
+
+          ringOSnakes.update();
+
+        }
+
+        renderer.render( scene , camera );
+      }
+
+      function onDoubleClick(){
+
+        paused = !paused;
+
+      }
+
+      function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+
+      function onLoad(){
+
+        loaded ++;
+
+        if( loaded == neededToLoad ){
+
+          init();
+          animate();
+
+        }
+
+      }
+
+    </script>
+
+  </body>
+</html>

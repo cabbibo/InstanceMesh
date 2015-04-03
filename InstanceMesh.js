@@ -39,53 +39,64 @@ function InstanceMesh( geometry , attributes , uniforms , vs , fs , params ){
 
 InstanceMesh.prototype.createGeometry = function( geometry  , attributes ){
 
-  var faces = geometry.faces.length;
+  var positions; var normals;
+  
+  if( geometry instanceof THREE.BufferGeometry ){
 
-  // Get the totalVerts by looking up how many faces
-  // we've got in the geometry
+    positions = geometry.attributes.position.array;
+    normals = geometry.attributes.normal.array;
 
-  var positions = new Float32Array( faces * 3 * 3 );
-  var normals   = new Float32Array( faces * 3 * 3 );
+  }else{
+    
+    var faces = geometry.faces.length;
 
-  for( var j = 0; j < faces; j++ ){
+    // Get the totalVerts by looking up how many faces
+    // we've got in the geometry
 
-    var index =  j * 3;
+    positions = new Float32Array( faces * 3 * 3 );
+    normals   = new Float32Array( faces * 3 * 3 );
 
-    var face = geometry.faces[j];
+    for( var j = 0; j < faces; j++ ){
 
-    var p1 = geometry.vertices[ face.a ];
-    var p2 = geometry.vertices[ face.b ];
-    var p3 = geometry.vertices[ face.c ];
+      var index =  j * 3;
 
-    var n1 = face.vertexNormals[ 0 ]; 
-    var n2 = face.vertexNormals[ 1 ]; 
-    var n3 = face.vertexNormals[ 2 ]; 
- 
-    positions[ index * 3  + 0 ] = p1.x;
-    positions[ index * 3  + 1 ] = p1.y;
-    positions[ index * 3  + 2 ] = p1.z;
+      var face = geometry.faces[j];
 
-    positions[ index * 3  + 3 ] = p2.x;
-    positions[ index * 3  + 4 ] = p2.y;
-    positions[ index * 3  + 5 ] = p2.z;
+      var p1 = geometry.vertices[ face.a ];
+      var p2 = geometry.vertices[ face.b ];
+      var p3 = geometry.vertices[ face.c ];
 
-    positions[ index * 3  + 6 ] = p3.x;
-    positions[ index * 3  + 7 ] = p3.y;
-    positions[ index * 3  + 8 ] = p3.z;
+      var n1 = face.vertexNormals[ 0 ]; 
+      var n2 = face.vertexNormals[ 1 ]; 
+      var n3 = face.vertexNormals[ 2 ]; 
+   
+      positions[ index * 3  + 0 ] = p1.x;
+      positions[ index * 3  + 1 ] = p1.y;
+      positions[ index * 3  + 2 ] = p1.z;
 
-    normals[ index * 3  + 0 ] = n1.x;
-    normals[ index * 3  + 1 ] = n1.y;
-    normals[ index * 3  + 2 ] = n1.z;
+      positions[ index * 3  + 3 ] = p2.x;
+      positions[ index * 3  + 4 ] = p2.y;
+      positions[ index * 3  + 5 ] = p2.z;
 
-    normals[ index * 3  + 3 ] = n2.x;
-    normals[ index * 3  + 4 ] = n2.y;
-    normals[ index * 3  + 5 ] = n2.z;
+      positions[ index * 3  + 6 ] = p3.x;
+      positions[ index * 3  + 7 ] = p3.y;
+      positions[ index * 3  + 8 ] = p3.z;
 
-    normals[ index * 3  + 6 ] = n3.x;
-    normals[ index * 3  + 7 ] = n3.y;
-    normals[ index * 3  + 8 ] = n3.z;
- 
-  } 
+      normals[ index * 3  + 0 ] = n1.x;
+      normals[ index * 3  + 1 ] = n1.y;
+      normals[ index * 3  + 2 ] = n1.z;
+
+      normals[ index * 3  + 3 ] = n2.x;
+      normals[ index * 3  + 4 ] = n2.y;
+      normals[ index * 3  + 5 ] = n2.z;
+
+      normals[ index * 3  + 6 ] = n3.x;
+      normals[ index * 3  + 7 ] = n3.y;
+      normals[ index * 3  + 8 ] = n3.z;
+   
+    } 
+
+  }
 
 
   var geo = new THREE.InstancedBufferGeometry();
