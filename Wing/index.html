@@ -1,0 +1,144 @@
+<html>
+
+  <head>
+    <style>
+      body{ margin: 0px; }
+      html{ overflow: hidden }
+      #stats{ 
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <script src = "../lib/three.min.js"                ></script>
+    <script src = "../lib/jquery.min.js"               ></script>
+    <script src = "../lib/stats.min.js"                ></script>
+    <script src = "../lib/ShaderLoader.js"             ></script>
+
+    <script src = "../lib/TrackballControls.js"        ></script>
+    
+    <script src = "../lib/PhysicsRenderer.js"          ></script>
+    <script src = "../lib/ObjectControls.js"           ></script>
+
+    <script src = "../InstanceMesh.js"                 ></script> 
+   
+    <!-- organs -->
+    <script src = "Wing.js"                  ></script>
+    <script src = "Spine.js"                  ></script>
+    <script src = "Dragon.js"                  ></script>
+    
+    <script>
+
+
+      var camera, renderer, scene , controls , clock;
+     
+      var stats; 
+    
+      var time = { type: "f" , value :0 };
+      var dT = { type:"f" , value: 0 };
+
+
+      var paused = false;
+
+      var soulUniforms = {
+  
+        dT: dT,
+        
+      }
+
+      var bodyUniforms = {
+  
+      }
+
+      var ringOSnakes;
+
+      var shaders = new ShaderLoader( 'shaders' );
+
+      shaders.shaderSetLoaded = function(){
+        init();
+        animate();
+      }
+
+      shaders.load( 'ss-wing' , 'wing' , 'simulation' );
+      
+      shaders.load( 'vs-wing' , 'wing' , 'vertex'     );
+      shaders.load( 'fs-wing' , 'wing' , 'fragment'   );
+
+
+      function init(){
+
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+
+        camera = new THREE.PerspectiveCamera( 65 , w/h , .001 , 100 );
+        camera.position.z = 10;
+   
+        scene = new THREE.Scene();
+
+        var dpr = window.devicePixelRatio || 1;
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( dpr );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        document.body.appendChild( renderer.domElement );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+        window.addEventListener( 'dblclick', onDoubleClick, false );
+
+
+        controls = new THREE.TrackballControls( camera );
+
+        clock = new THREE.Clock();
+      
+        stats = new Stats();
+        stats.domElement.id = 'stats';
+        document.body.appendChild( stats.domElement ); 
+
+
+        dragon  = new Dragon();
+        scene.add( dragon.body );
+        
+ 
+      }
+
+      
+      function animate(){
+
+       
+
+        
+        requestAnimationFrame( animate );
+        stats.update();
+        controls.update();
+
+        dT.value = clock.getDelta();
+        time.value += dT.value;
+
+        dragon.update( 5 , time.value );
+
+        renderer.render( scene , camera );
+      }
+
+      function onDoubleClick(){
+
+        paused = !paused;
+
+      }
+
+      function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+    </script>
+
+  </body>
+</html>
