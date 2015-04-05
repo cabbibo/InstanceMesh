@@ -27,9 +27,12 @@
     <script src = "../InstanceMesh.js"                 ></script> 
    
     <!-- organs -->
-    <script src = "Wing.js"                  ></script>
-    <script src = "Spine.js"                  ></script>
-    <script src = "Dragon.js"                  ></script>
+    <script src = "Wing.js"                            ></script>
+    <script src = "Spine.js"                           ></script>
+    <script src = "Scales.js"                          ></script>
+
+    <!-- Creature interface -->
+    <script src = "Dragon.js"                          ></script>
     
     <script>
 
@@ -54,7 +57,6 @@
   
       }
 
-      var ringOSnakes;
 
       var shaders = new ShaderLoader( 'shaders' );
 
@@ -67,6 +69,16 @@
       
       shaders.load( 'vs-wing' , 'wing' , 'vertex'     );
       shaders.load( 'fs-wing' , 'wing' , 'fragment'   );
+      
+      
+      shaders.load( 'vs-spine' , 'spine' , 'vertex'     );
+      shaders.load( 'fs-spine' , 'spine' , 'fragment'   );
+
+      shaders.load( 'vs-scale' , 'scale' , 'vertex'     );
+      shaders.load( 'fs-scale' , 'scale' , 'fragment'   );
+
+      shaders.load( 'vs-arm' , 'arm' , 'vertex'     );
+      shaders.load( 'fs-arm' , 'arm' , 'fragment'   );
 
 
       function init(){
@@ -108,9 +120,6 @@
       
       function animate(){
 
-       
-
-        
         requestAnimationFrame( animate );
         stats.update();
         controls.update();
@@ -118,7 +127,10 @@
         dT.value = clock.getDelta();
         time.value += dT.value;
 
-        dragon.update( 5 , time.value );
+        if( !paused ){
+          dragon.update( 5 , time.value );
+
+        }
 
         renderer.render( scene , camera );
       }

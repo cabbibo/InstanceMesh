@@ -7,6 +7,8 @@ function Wing( spine , left , params ){
 
   this.v1 = new THREE.Vector3();
   this.v2 = new THREE.Vector3();
+  this.v3 = new THREE.Vector3();
+  this.v4 = new THREE.Vector3();
 
  
  
@@ -21,8 +23,8 @@ function Wing( spine , left , params ){
 
   } 
 
-  var size = 16;
-  var span = 10;
+  var size = params.numBones;
+  var span = params.wingSpan;
   var wingSpineDepth = 3;
 
   this.createBones( size , span );
@@ -33,13 +35,15 @@ function Wing( spine , left , params ){
 
   }
   
-  this.soulSize = 32; 
+  this.soulSize = 32;
+
+  var vs = shaders.setValue( params.vs.wing , 'SIZE' , this.soulSize ); 
   this.wingGeometry = this.createWingGeometry( this.soulSize );
   this.wingMaterial = new THREE.ShaderMaterial({
   
     uniforms: this.wingUniforms,
-    vertexShader: params.vertexShader,
-    fragmentShader: params.fragmentShader,
+    vertexShader: vs,
+    fragmentShader: params.fs.wing,
     side: THREE.DoubleSide
 
 
@@ -48,7 +52,7 @@ function Wing( spine , left , params ){
   this.wing = new THREE.Mesh( this.wingGeometry , this.wingMaterial ); 
   
   
-  var ss = shaders.setValue( params.simulationShader , 'NUMBONES' , size ); 
+  var ss = shaders.setValue( params.ss.wing , 'NUMBONES' , size ); 
   ss = shaders.setValue( ss , 'NUMSPINE' , wingSpineDepth ); 
   this.soul = new PhysicsRenderer( 
     this.soulSize, 
@@ -60,6 +64,7 @@ function Wing( spine , left , params ){
   this.soul.setUniform( 'bones' , this.wingUniforms.bones ); 
   this.soul.setUniform( 'spine' , this.wingUniforms.spine ); 
   this.soul.setUniform( 'dT' , dT ); 
+  this.soul.setUniform( 'time' , time ); 
   this.soul.addBoundTexture( this.wingUniforms.t_pos   , 'output'    );
   this.soul.addBoundTexture( this.wingUniforms.t_oPos  , 'oOutput'   );
   this.soul.addBoundTexture( this.wingUniforms.t_ooPos , 'ooOutput'  );
@@ -71,7 +76,28 @@ function Wing( spine , left , params ){
   this.soul.debugScene.position.z = - 5;
  
   this.body.add( this.wing ); 
-  
+
+
+  var slices = params.armSlices;
+  var sides  = params.armSides;
+
+  this.armGeometry = this.createArmGeometry( slices , sides ); 
+
+  var vs = shaders.setValue( params.vs.arm , 'NUMBONES' , params.numBones );
+
+  this.armMaterial = new THREE.ShaderMaterial({
+
+    uniforms: this.wingUniforms,
+    vertexShader: vs,
+    fragmentShader: params.fs.arm
+
+  }); 
+ 
+  this.arm = new THREE.Mesh( this.armGeometry , this.armMaterial );
+
+
+  this.body.add( this.arm ); 
+
 }
 
 
@@ -157,6 +183,73 @@ Wing.prototype.createWingGeometry = function( size){
 }
 
 
+Wing.prototype.createArmGeometry = function( slices , sides ){
+
+
+  var totalVerts = (slices-1) * sides * 3 * 2;
+  // x is position around specific slice
+  // y is position along spine
+  // z is ?!??!?!
+  var positions = new Float32Array( totalVerts * 3 );
+
+  for( var i = 1; i < slices; i++ ){
+    for( var j = 0; j < sides; j++ ){
+
+      var index =( ((i-1) * sides) + j) * 3 * 2;
+
+      var up = (j + 1) % sides;
+      
+      this.v1.set( j/sides, (i - .5 ) / slices  , 0 );
+      this.v2.set( j/sides, ( i + .5 ) / slices  , 0 );
+      this.v3.set( up/sides ,( i - .5) / slices , 0 );
+      this.v4.set( up/sides , ( i + .5 ) / slices  , 0 );
+     
+
+      // Tri 1
+      positions[ index * 3 + 0  ] = this.v1.x; 
+      positions[ index * 3 + 1  ] = this.v1.y; 
+      positions[ index * 3 + 2  ] = this.v1.z;
+
+      positions[ index * 3 + 3  ] = this.v2.x; 
+      positions[ index * 3 + 4  ] = this.v2.y; 
+      positions[ index * 3 + 5  ] = this.v2.z;
+
+      positions[ index * 3 + 6  ] = this.v3.x; 
+      positions[ index * 3 + 7  ] = this.v3.y; 
+      positions[ index * 3 + 8  ] = this.v3.z;
+
+
+      // Tri 2
+      positions[ index * 3 + 9  ] = this.v3.x; 
+      positions[ index * 3 + 10 ] = this.v3.y; 
+      positions[ index * 3 + 11 ] = this.v3.z;
+
+      positions[ index * 3 + 12 ] = this.v2.x; 
+      positions[ index * 3 + 13 ] = this.v2.y; 
+      positions[ index * 3 + 14 ] = this.v2.z;
+
+      positions[ index * 3 + 15 ] = this.v4.x; 
+      positions[ index * 3 + 16 ] = this.v4.y; 
+      positions[ index * 3 + 17 ] = this.v4.z;
+
+    }
+  }
+
+  var geo = new THREE.BufferGeometry();
+
+  var posA = new THREE.BufferAttribute( positions , 3 );
+
+  geo.addAttribute( 'position' , posA );
+
+
+
+  return geo;
+
+
+}
+
+
+
 Wing.prototype.createBones = function( size , span ){
  
   var geo = new THREE.IcosahedronGeometry( .1 , 1 );
@@ -166,7 +259,7 @@ Wing.prototype.createBones = function( size , span ){
 
     var bone = new THREE.Mesh( geo , mat );
 
-    this.body.add( bone );
+    //this.body.add( bone );
 
     bone.velocity = new THREE.Vector3();
 
